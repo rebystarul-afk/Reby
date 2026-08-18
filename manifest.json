@@ -1,0 +1,12 @@
+{
+  "name": "Jocuri - Impostor",
+  "short_name": "Jocuri",
+  "description": "Jocuri pentru mai mulți jucători: Impostor și 3 la fel, 1 diferit.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827",
+  "orientation": "portrait",
+  "lang": "ro"
+}

@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Jocuri</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111827">
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+        navigator.serviceWorker.register("service-worker.js");
+    });
+}
+</script>
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 15px;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #111827, #1e3a5f);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 520px;
+    text-align: center;
+}
+
+.card {
+    background: rgba(255,255,255,0.10);
+    border-radius: 25px;
+    padding: 25px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+h1 {
+    font-size: 38px;
+    margin: 5px 0 15px;
+}
+
+h2 {
+    font-size: 27px;
+}
+
+.subtitle {
+    color: #cbd5e1;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+.small {
+    color: #94a3b8;
+    font-size: 14px;
+    margin-top: 15px;
+}
+
+/* ================= BUTOANE ================= */
+
+button {
+    width: 100%;
+    padding: 17px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 15px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+.menuButton {
+    min-height: 90px;
+    font-size: 22px;
+}
+
+.impostorMenu {
+    background: #ef4444;
+}
+
+.differentMenu {
+    background: #8b5cf6;
+}
+
+.start {
+    background: #22c55e;
+}
+
+.show {
+    background: #3b82f6;
+    min-height: 110px;
+}
+
+.hide {
+    background: #f59e0b;
+}
+
+.next {
+    background: #22c55e;
+}
+
+.question {
+    background: #8b5cf6;
+}
+
+.vote {
+    background: #ef4444;
+}
+
+.guess {
+    background: #f97316;
+}
+
+.restart {
+    background: #6366f1;
+}
+
+.back {
+    background: #475569;
+}
+
+/* ================= JUCATORI ================= */
+
+.playerButtons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.playerButtons button {
+    margin: 0;
+    padding: 15px 5px;
+    background: #334155;
+}
+
+.playerButtons button.selected {
+    background: #22c55e;
+    transform: scale(1.05);
+}
+
+/* ================= INPUT ================= */
+
+input {
+    width: 100%;
+    padding: 15px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    outline: none;
+}
+
+/* ================= JUCATOR ================= */
+
+.player {
+    font-size: 30px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.progress {
+    color: #cbd5e1;
+}
+
+/* ================= SECRET ================= */
+
+.secret,
+.word {
+    min-height: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.3);
+    border-radius: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.impostor {
+    background: rgba(239,68,68,0.3);
+    border: 2px solid #ef4444;
+}
+
+/* ================= INTREBARI ================= */
+
+.questionBox {
+    background: rgba(0,0,0,0.25);
+    border-radius: 18px;
+    padding: 20px;
+    margin: 20px 0;
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+/* ================= VOT ================= */
+
+.voteGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.voteGrid button {
+    margin: 0;
+    background: #334155;
+}
+
+.voteGrid button.selected {
+    background: #ef4444;
+}
+
+/* ================= REZULTAT ================= */
+
+.result {
+    font-size: 23px;
+    line-height: 1.5;
+    margin: 25px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- =====================================================
+     MENIU PRINCIPAL
+===================================================== -->
+
+<div id="mainMenu" class="card">
+
+    <h1>🎮</h1>
+
+    <h1>JOCURI</h1>
+
+    <div class="subtitle">
+        Alege jocul pe care vrei să îl joci.
+    </div>
+
+    <button class="menuButton impostorMenu"
+            onclick="openGame('impostor')">
+        🕵️ IMPOSTOR
+        <br>
+        <small>4–12 jucători</small>
+    </button>
+
+    <button class="menuButton differentMenu"
+            onclick="openGame('different')">
+        🎭 3 Supraviețuitori, 1 Impostor 
+        <br>
+        <small>4 jucători</small>
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     IMPOSTOR - START
+===================================================== -->
+
+<div id="impostorStart" class="card hidden">
+
+    <h1>🕵️</h1>
+
+    <h1>IMPOSTOR</h1>
+
+    <div class="subtitle">
+
+        Toți jucătorii primesc aceeași locație,
+        dar unul este impostorul.
+
+        <br><br>
+
+        Descoperiți-l înainte să ghicească locația!
+
+    </div>
+
+    <h2>👥 Câți jucători?</h2>
+
+    <div class="playerButtons">
+
+        <button id="p4" onclick="selectPlayers(4)">4</button>
+        <button id="p5" onclick="selectPlayers(5)">5</button>
+        <button id="p6" onclick="selectPlayers(6)">6</button>
+        <button id="p7" onclick="selectPlayers(7)">7</button>
+
+        <button id="p8" onclick="selectPlayers(8)">8</button>
+        <button id="p9" onclick="selectPlayers(9)">9</button>
+        <button id="p10" onclick="selectPlayers(10)">10</button>
+        <button id="p11" onclick="selectPlayers(11)">11</button>
+
+        <button id="p12" onclick="selectPlayers(12)">12</button>
+
+    </div>
+
+    <div id="playersInfo" class="small">
+        Alege numărul de jucători.
+    </div>
+
+    <button class="start" onclick="startImpostor()">
+        ▶️ ÎNCEPE JOCUL
+    </button>
+
+    <button class="back" onclick="backToMenu()">
+        🏠 MENIU PRINCIPAL
+    </button>
+
+    <div class="small">
+        Pasează telefonul fiecărui jucător.
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     IMPOSTOR - ROL
+===================================================== -->
+
+<div id="impostorRole" class="card hidden">
+
+    <div id="roleProgress" class="progress"></div>
+
+    <div id="rolePlayer" class="player"></div>
+
+    <div id="roleInstruction">
+        Apasă pentru a vedea rolul.
+    </div>
+
+    <button id="showRoleButton"
+            class="show"
+            onclick="showRole()">
+        👁️ VEZI ROLUL
+    </button>
+
+    <div id="secretBox" class="secret hidden"></div>
+
+    <button id="hideRoleButton"
+            class="hide hidden"
+            onclick="hideRole()">
+        🙈 ASCUNDE ROLUL
+    </button>
+
+    <button id="nextRoleButton"
+            class="next hidden"
+            onclick="nextPlayer()">
+        ➡️ URMĂTORUL JUCĂTOR
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     IMPOSTOR - INTREBARI
+===================================================== -->
+
+<div id="impostorQuestions" class="card hidden">
+
+    <h1>❓</h1>
+
+    <h2>FAZA ÎNTREBĂRILOR</h2>
+
+    <div class="questionBox">
+
+        Fiecare jucător pune întrebări celorlalți.
+
+        <br><br>
+
+        Încercați să descoperiți impostorul!
+
+    </div>
+
+    <button class="question"
+            onclick="randomQuestion()">
+        🎲 ÎNTREBARE ALEATORIE
+    </button>
+
+    <div id="questionText"
+         class="questionBox hidden">
+    </div>
+
+    <button class="next"
+            onclick="openVoting()">
+        🗳️ TRECEM LA VOT
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     IMPOSTOR - VOT
+===================================================== -->
+
+<div id="impostorVote" class="card hidden">
+
+    <h1>🗳️</h1>
+
+    <h2>VOTAȚI IMPOSTORUL</h2>
+
+    <div class="subtitle">
+        Alegeți jucătorul despre care credeți
+        că este impostorul.
+    </div>
+
+    <div id="voteGrid" class="voteGrid"></div>
+
+    <button class="vote"
+            onclick="confirmVote()">
+        🗳️ CONFIRMĂ VOTUL
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     IMPOSTOR - REZULTAT
+===================================================== -->
+
+<div id="impostorResult" class="card hidden">
+
+    <h1>🎬</h1>
+
+    <h2>REZULTAT</h2>
+
+    <div id="resultText" class="result"></div>
+
+    <div id="locationText" class="result"></div>
+
+    <button id="guessButton"
+            class="guess hidden"
+            onclick="openGuess()">
+        🕵️ IMPOSTORUL GHICEȘTE LOCAȚIA
+    </button>
+
+    <button class="restart"
+            onclick="restartImpostor()">
+        🔄 RUNDA NOUĂ
+    </button>
+
+    <button class="back"
+            onclick="backToMenu()">
+        🏠 MENIU PRINCIPAL
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     IMPOSTOR - GHICIRE
+===================================================== -->
+
+<div id="impostorGuess" class="card hidden">
+
+    <h1>🕵️</h1>
+
+    <h2>GHICEȘTE LOCAȚIA</h2>
+
+    <div class="subtitle">
+
+        Ai fost prins!
+
+        <br><br>
+
+        Dacă ghicești locația,
+        impostorul câștigă.
+
+    </div>
+
+    <input id="guessInput"
+           type="text"
+           placeholder="Scrie locația">
+
+    <button class="guess"
+            onclick="checkGuess()">
+        🔎 VERIFICĂ
+    </button>
+
+    <div id="guessResult"
+         class="result hidden">
+    </div>
+
+    <button class="restart"
+            onclick="restartImpostor()">
+        🔄 RUNDA NOUĂ
+    </button>
+
+    <button class="back"
+            onclick="backToMenu()">
+        🏠 MENIU PRINCIPAL
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     3 Supraviețuitori 1 Impostor - START
+===================================================== -->
+
+<div id="differentStart" class="card hidden">
+
+    <h1>🎭</h1>
+
+    <h1>3 LA FEL, 1 DIFERIT</h1>
+
+    <div class="subtitle">
+
+        Trei jucători primesc același cuvânt,
+        iar unul primește un cuvânt diferit.
+
+    </div>
+
+    <label>
+        Cuvântul comun
+    </label>
+
+    <input id="commonWord"
+           type="text"
+           placeholder="Ex: Pisică"
+           autocomplete="off">
+
+    <label>
+        Cuvântul diferit
+    </label>
+
+    <input id="differentWord"
+           type="text"
+           placeholder="Ex: Câine"
+           autocomplete="off">
+
+    <button class="start"
+            onclick="startDifferent()">
+        ▶️ ÎNCEPE JOCUL
+    </button>
+
+    <button class="back"
+            onclick="backToMenu()">
+        🏠 MENIU PRINCIPAL
+    </button>
+
+    <div class="small">
+        Telefonul se pasează fiecărui jucător.
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     3 LA FEL 1 DIFERIT - JUCATOR
+===================================================== -->
+
+<div id="differentPlayer" class="card hidden">
+
+    <div class="progress"
+         id="differentProgress">
+        Jucătorul 1 din 4
+    </div>
+
+    <div class="player"
+         id="differentPlayerName">
+        👤 JUCĂTORUL 1
+    </div>
+
+    <div id="differentInstruction">
+        Apasă butonul pentru a vedea cuvântul.
+    </div>
+
+    <button id="showWordButton"
+            class="show"
+            onclick="showWord()">
+        👁️ ARATĂ CUVÂNTUL
+    </button>
+
+    <div id="wordBox"
+         class="word hidden">
+    </div>
+
+    <button id="hideWordButton"
+            class="hide hidden"
+            onclick="hideWord()">
+        🙈 ASCUNDE CUVÂNTUL
+    </button>
+
+    <button id="nextWordButton"
+            class="next hidden"
+            onclick="nextDifferentPlayer()">
+        ➡️ URMĂTORUL JUCĂTOR
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     3 supraviețuitori 1 Impostor - REZULTAT
+===================================================== -->
+
+<div id="differentResult" class="card hidden">
+
+    <h1>🎉</h1>
+
+    <h2>GATA!</h2>
+
+    <div class="result">
+
+        Toți cei 4 jucători și-au primit cuvântul.
+
+        <br><br>
+
+        Discutați și încercați să aflați
+        cine este Impostorul! 😈
+
+    </div>
+
+    <button class="danger"
+            onclick="showDifferentPlayer()">
+        🔎 ARATĂ DIFERITUL
+    </button>
+
+    <div id="differentResultText"
+         class="result hidden">
+    </div>
+
+    <button class="restart"
+            onclick="restartDifferent()">
+        🔄 RUNDA NOUĂ
+    </button>
+
+    <button class="back"
+            onclick="backToMenu()">
+        🏠 MENIU PRINCIPAL
+    </button>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   SCHIMBARE ECRAN
+===================================================== */
+
+const allScreens = [
+    "mainMenu",
+
+    "impostorStart",
+    "impostorRole",
+    "impostorQuestions",
+    "impostorVote",
+    "impostorResult",
+    "impostorGuess",
+
+    "differentStart",
+    "differentPlayer",
+    "differentResult"
+];
+
+function showScreen(id) {
+
+    allScreens.forEach(function(screen) {
+
+        document
+            .getElementById(screen)
+            .classList.add("hidden");
+
+    });
+
+    document
+        .getElementById(id)
+        .classList.remove("hidden");
+}
+
+
+/* =====================================================
+   MENIU
+===================================================== */
+
+function openGame(game) {
+
+    if (game === "impostor") {
+        showScreen("impostorStart");
+    }
+
+    if (game === "different") {
+        showScreen("differentStart");
+    }
+}
+
+
+function backToMenu() {
+
+    showScreen("mainMenu");
+}
+
+
+/* =====================================================
+   ================= IMPOSTOR ==========================
+===================================================== */
+
+let players = 0;
+let impostor = 0;
+let currentPlayer = 1;
+let selectedVote = 0;
+let currentLocation = "";
+
+
+const locations = [
+
+    "PLAJĂ",
+    "SPITAL",
+    "AEROPORT",
+    "ȘCOALĂ",
+    "PIZZERIE",
+    "CASTEL",
+    "STAȚIE SPAȚIALĂ",
+    "STAȚIE DE POMPIERI",
+    "SECȚIE DE POLIȚIE",
+    "STADION",
+    "CINEMATOGRAF",
+    "RESTAURANT",
+    "SUPERMARKET",
+    "GARĂ",
+    "BENZINĂRIE",
+    "HOTEL",
+    "BANCĂ",
+    "PARC DE DISTRACȚII",
+    "CAMPING",
+    "ACVARIU",
+    "GRĂDINĂ ZOOLOGICĂ",
+    "SALĂ DE SPORT",
+    "FRIZERIE",
+    "INTERNET CAFE",
+    "VAPOR",
+    "CORABIE PIRAT",
+    "CAZINO",
+    "TEREN DE FOTBAL",
+    "CONCERT",
+    "BIBLIOTECĂ",
+    "MUZEU",
+    "FABRICĂ",
+    "PĂDURE",
+    "MUNTE",
+    "DEȘERT",
+    "INSULĂ",
+    "METROU",
+    "AUTOBUZ",
+    "TAXI",
+    "PORT",
+    "CAFENEA",
+    "BAR",
+    "BIROU",
+    "CASĂ",
+    "ZGÂRIE-NORI",
+    "MALL",
+    "UNIVERSITATE"
+
+];
+
+
+const questions = [
+
+    "Este un loc aglomerat?",
+    "Ai mai fost aici?",
+    "Ai veni aici noaptea?",
+    "Ce obiect găsești aici?",
+    "Este în interior sau exterior?",
+    "Ai nevoie de bani aici?",
+    "Ai veni singur aici?",
+    "Ai petrece mult timp aici?",
+    "Este zgomotos?",
+    "Poți mânca aici?",
+    "Poți dormi aici?",
+    "Ce meserie ai putea avea aici?",
+    "Este periculos?",
+    "Ai face poze aici?",
+    "Ai aduce un copil aici?",
+    "Ai merge aici în vacanță?",
+    "Ce ai cumpăra aici?",
+    "Poți găsi animale aici?",
+    "Ai veni aici cu prietenii?",
+    "Este un loc scump?"
+
+];
+
+
+function selectPlayers(number) {
+
+    players = number;
+
+    for (let i = 4; i <= 12; i++) {
+
+        const button =
+            document.getElementById("p" + i);
+
+        if (button) {
+            button.classList.remove("selected");
+        }
+    }
+
+    document
+        .getElementById("p" + number)
+        .classList.add("selected");
+
+    document
+        .getElementById("playersInfo")
+        .textContent =
+        "Ai ales " + number + " jucători.";
+}
+
+
+function startImpostor() {
+
+    if (players < 4 || players > 12) {
+
+        alert("Alege între 4 și 12 jucători!");
+
+        return;
+    }
+
+    currentLocation =
+        locations[
+            Math.floor(
+                Math.random() * locations.length
+            )
+        ];
+
+    impostor =
+        Math.floor(
+            Math.random() * players
+        ) + 1;
+
+    currentPlayer = 1;
+
+    selectedVote = 0;
+
+    showScreen("impostorRole");
+
+    preparePlayer();
+}
+
+
+function preparePlayer() {
+
+    document
+        .getElementById("rolePlayer")
+        .textContent =
+        "👤 JUCĂTORUL " + currentPlayer;
+
+    document
+        .getElementById("roleProgress")
+        .textContent =
+        "Jucătorul " +
+        currentPlayer +
+        " din " +
+        players;
+
+    document
+        .getElementById("roleInstruction")
+        .textContent =
+        "Apasă pentru a vedea rolul.";
+
+    document
+        .getElementById("showRoleButton")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("secretBox")
+        .classList.add("hidden");
+
+    document
+        .getElementById("hideRoleButton")
+        .classList.add("hidden");
+
+    document
+        .getElementById("nextRoleButton")
+        .classList.add("hidden");
+}
+
+
+function showRole() {
+
+    const box =
+        document.getElementById("secretBox");
+
+    if (currentPlayer === impostor) {
+
+        box.innerHTML =
+            "🕵️<br><br>IMPOSTOR";
+
+        box.classList.add("impostor");
+
+    } else {
+
+        box.innerHTML =
+            "📍<br><br>" +
+            currentLocation;
+
+        box.classList.remove("impostor");
+    }
+
+    box.classList.remove("hidden");
+
+    document
+        .getElementById("showRoleButton")
+        .classList.add("hidden");
+
+    document
+        .getElementById("hideRoleButton")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("roleInstruction")
+        .textContent =
+        "Memorează rolul!";
+}
+
+
+function hideRole() {
+
+    const box =
+        document.getElementById("secretBox");
+
+    box.textContent =
+        "🔒 ROL ASCUNS";
+
+    document
+        .getElementById("hideRoleButton")
+        .classList.add("hidden");
+
+    document
+        .getElementById("nextRoleButton")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("roleInstruction")
+        .textContent =
+        "Pasează telefonul următorului jucător.";
+}
+
+
+function nextPlayer() {
+
+    if (currentPlayer < players) {
+
+        currentPlayer++;
+
+        preparePlayer();
+
+    } else {
+
+        showScreen("impostorQuestions");
+
+        document
+            .getElementById("questionText")
+            .classList.add("hidden");
+    }
+}
+
+
+function randomQuestion() {
+
+    const index =
+        Math.floor(
+            Math.random() * questions.length
+        );
+
+    const box =
+        document.getElementById("questionText");
+
+    box.textContent =
+        "❓ " + questions[index];
+
+    box.classList.remove("hidden");
+}
+
+
+function openVoting() {
+
+    selectedVote = 0;
+
+    const grid =
+        document.getElementById("voteGrid");
+
+    grid.innerHTML = "";
+
+    for (let i = 1; i <= players; i++) {
+
+        const button =
+            document.createElement("button");
+
+        button.textContent =
+            "👤 Jucător " + i;
+
+        button.onclick =
+            function() {
+
+                selectVote(i, button);
+
+            };
+
+        grid.appendChild(button);
+    }
+
+    showScreen("impostorVote");
+}
+
+
+function selectVote(player, button) {
+
+    selectedVote = player;
+
+    const buttons =
+        document.querySelectorAll(
+            "#voteGrid button"
+        );
+
+    buttons.forEach(function(btn) {
+
+        btn.classList.remove("selected");
+
+    });
+
+    button.classList.add("selected");
+}
+
+
+function confirmVote() {
+
+    if (selectedVote === 0) {
+
+        alert("Alegeți un jucător!");
+
+        return;
+    }
+
+    showScreen("impostorResult");
+
+    const result =
+        document.getElementById("resultText");
+
+    const locationText =
+        document.getElementById("locationText");
+
+    const guessButton =
+        document.getElementById("guessButton");
+
+
+    if (selectedVote === impostor) {
+
+        result.innerHTML =
+            "🎉 <strong>IMPOSTORUL A FOST PRINS!</strong>" +
+            "<br><br>" +
+            "Jucătorul " +
+            impostor +
+            " era impostorul.";
+
+        locationText.innerHTML =
+            "📍 Locația era:<br><br>" +
+            "<strong>" +
+            currentLocation +
+            "</strong>";
+
+        guessButton.classList.remove("hidden");
+
+    } else {
+
+        result.innerHTML =
+            "💀 <strong>IMPOSTORUL A SCĂPAT!</strong>" +
+            "<br><br>" +
+            "Ați votat Jucătorul " +
+            selectedVote +
+            ".";
+
+        locationText.innerHTML =
+            "🕵️ Impostorul era Jucătorul " +
+            "<strong>" +
+            impostor +
+            "</strong>" +
+            "<br><br>" +
+            "📍 Locația era:<br><br>" +
+            "<strong>" +
+            currentLocation +
+            "</strong>";
+
+        guessButton.classList.add("hidden");
+    }
+}
+
+
+function openGuess() {
+
+    document
+        .getElementById("guessInput")
+        .value = "";
+
+    document
+        .getElementById("guessResult")
+        .classList.add("hidden");
+
+    showScreen("impostorGuess");
+}
+
+
+function checkGuess() {
+
+    const input =
+        document
+            .getElementById("guessInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+    if (input === "") {
+
+        alert("Scrie o locație!");
+
+        return;
+    }
+
+    const correct =
+        currentLocation.toLowerCase();
+
+    const result =
+        document.getElementById("guessResult");
+
+    result.classList.remove("hidden");
+
+
+    if (
+        input === correct ||
+        correct.includes(input) ||
+        input.includes(correct)
+    ) {
+
+        result.innerHTML =
+            "🏆 <strong>IMPOSTORUL CÂȘTIGĂ!</strong>" +
+            "<br><br>" +
+            "A ghicit locația:" +
+            "<br><br>" +
+            "<strong>" +
+            currentLocation +
+            "</strong>";
+
+    } else {
+
+        result.innerHTML =
+            "❌ <strong>IMPOSTORUL A GREȘIT!</strong>" +
+            "<br><br>" +
+            "Locația era:" +
+            "<br><br>" +
+            "<strong>" +
+            currentLocation +
+            "</strong>" +
+            "<br><br>" +
+            "🎉 Ceilalți jucători câștigă!";
+    }
+}
+
+
+function restartImpostor() {
+
+    players = 0;
+    impostor = 0;
+    currentPlayer = 1;
+    selectedVote = 0;
+    currentLocation = "";
+
+    for (let i = 4; i <= 12; i++) {
+
+        const button =
+            document.getElementById("p" + i);
+
+        if (button) {
+            button.classList.remove("selected");
+        }
+    }
+
+    document
+        .getElementById("playersInfo")
+        .textContent =
+        "Alege numărul de jucători.";
+
+    document
+        .getElementById("guessButton")
+        .classList.add("hidden");
+
+    showScreen("impostorStart");
+}
+
+
+/* =====================================================
+   ============== 3 Supraviețuitori, 1 Impostor ===================
+===================================================== */
+
+let commonWord = "";
+let differentWord = "";
+let differentPlayerNumber = 0;
+let differentCurrentPlayer = 1;
+
+
+function startDifferent() {
+
+    commonWord =
+        document
+            .getElementById("commonWord")
+            .value
+            .trim();
+
+    differentWord =
+        document
+            .getElementById("differentWord")
+            .value
+            .trim();
+
+
+    if (
+        commonWord === "" ||
+        differentWord === ""
+    ) {
+
+        alert("Introdu ambele cuvinte!");
+
+        return;
+    }
+
+
+    if (
+        commonWord.toLowerCase() ===
+        differentWord.toLowerCase()
+    ) {
+
+        alert(
+            "Cuvintele trebuie să fie diferite!"
+        );
+
+        return;
+    }
+
+
+    differentPlayerNumber =
+        Math.floor(
+            Math.random() * 4
+        ) + 1;
+
+    differentCurrentPlayer = 1;
+
+    showScreen("differentPlayer");
+
+    prepareDifferentPlayer();
+}
+
+
+function prepareDifferentPlayer() {
+
+    document
+        .getElementById("differentPlayerName")
+        .innerText =
+        "👤 JUCĂTORUL " +
+        differentCurrentPlayer;
+
+    document
+        .getElementById("differentProgress")
+        .innerText =
+        "Jucătorul " +
+        differentCurrentPlayer +
+        " din 4";
+
+    document
+        .getElementById("differentInstruction")
+        .innerText =
+        "Apasă butonul pentru a vedea cuvântul.";
+
+    document
+        .getElementById("showWordButton")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("wordBox")
+        .classList.add("hidden");
+
+    document
+        .getElementById("hideWordButton")
+        .classList.add("hidden");
+
+    document
+        .getElementById("nextWordButton")
+        .classList.add("hidden");
+
+    document
+        .getElementById("wordBox")
+        .innerText = "";
+}
+
+
+function showWord() {
+
+    let word;
+
+
+    if (
+        differentCurrentPlayer ===
+        differentPlayerNumber
+    ) {
+
+        word = differentWord;
+
+    } else {
+
+        word = commonWord;
+
+    }
+
+
+    document
+        .getElementById("wordBox")
+        .innerText = word;
+
+    document
+        .getElementById("wordBox")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("showWordButton")
+        .classList.add("hidden");
+
+    document
+        .getElementById("hideWordButton")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("differentInstruction")
+        .innerText =
+        "Memorează cuvântul!";
+}
+
+
+function hideWord() {
+
+    document
+        .getElementById("wordBox")
+        .innerText =
+        "🔒 CUVÂNT ASCUNS";
+
+    document
+        .getElementById("hideWordButton")
+        .classList.add("hidden");
+
+    document
+        .getElementById("nextWordButton")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("differentInstruction")
+        .innerText =
+        "Pasează telefonul următorului jucător.";
+}
+
+
+function nextDifferentPlayer() {
+
+    if (differentCurrentPlayer < 4) {
+
+        differentCurrentPlayer++;
+
+        prepareDifferentPlayer();
+
+    } else {
+
+        showScreen("differentResult");
+
+    }
+}
+
+
+function showDifferentPlayer() {
+
+    const result =
+        document.getElementById(
+            "differentResultText"
+        );
+
+    result.innerHTML =
+        "😈 Diferitul a fost:" +
+        "<br><br>" +
+        "<strong>JUCĂTORUL " +
+        differentPlayerNumber +
+        "</strong>";
+
+    result.classList.remove("hidden");
+}
+
+
+function restartDifferent() {
+
+    differentCurrentPlayer = 1;
+
+    document
+        .getElementById("differentResultText")
+        .classList.add("hidden");
+
+    showScreen("differentStart");
+}
+
+</script>
+
+</body>
+</html>
